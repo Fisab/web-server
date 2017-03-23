@@ -13,13 +13,6 @@ def clearReq(req):
 def encode(text):
 	return bytes(text.encode('utf-8'))
 
-def create_header(type, length):
-	headers = {}
-	headers['Content-type'] = type
-	headers['Content-length'] = length
-	headers_text = "\n".join([ "%s: %s"%(k,v) for k,v in headers.items()])
-	return headers_text
-
 def main_page():
 	ls = os.listdir(curPath)
 	dir = []
