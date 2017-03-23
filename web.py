@@ -81,7 +81,7 @@ def not_found(conn):
 	headers['Content-length'] = len(html)
 	headers_text = "\n".join([ "%s: %s"%(k,v) for k,v in headers.items()])
 
-	conn.send(("HTTP/1.1 200 OK\n%s\n\n%s"%(headers_text, html)).encode('ascii'))
+	conn.send(("HTTP/1.1 404 OK\n%s\n\n%s"%(headers_text, html)).encode('ascii'))
 	conn.close()
 
 def check_existance(path):
