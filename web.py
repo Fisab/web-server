@@ -53,9 +53,13 @@ def img(path, conn, req):
 
 	img = open(path[1:], 'rb').read()
 
-	headers_text = create_header('image/'+file.split('.')[1], size)
+	headers = {}
+	headers['Content-type'] = 'image/png'
+	headers['Content-length'] = size
+	headers_text = "\n".join([ "%s: %s"%(k,v) for k,v in headers.items()])
+
 	print(headers_text)
-	conn.send(encode("HTTP/1.1 200 OK\n%s\n\n%s")%(encode(headers_text), img))
+	conn.send("HTTP/1.1 200 OK\n%s\n\n%s".encode('ascii')%(headers_text.encode('ascii'), img))
 	conn.close()
 
 def html(path, conn, req):
@@ -68,14 +72,23 @@ def html(path, conn, req):
 	else:
 		html = open(file, 'r').read()
 
-	headers_text = create_header('text/html; charset=utf-8', len(html))
-	conn.send(encode("HTTP/1.1 200 OK\n%s\n\n%s"%(headers_text, html)))
+	headers = {}
+	headers['Content-type'] = 'text/html; charset=utf-8'
+	headers['Content-length'] = len(html)
+	headers_text = "\n".join([ "%s: %s"%(k,v) for k,v in headers.items()])
+
+	conn.send(("HTTP/1.1 404 OK\n%s\n\n%s"%(headers_text, html)).encode('ascii'))
 	conn.close()
 
 def not_found(conn):
 	html = open('404.html', 'r').read()
-	headers_text = create_header('text/html; charset=utf-8', len(html))
-	conn.send(encode("HTTP/1.1 200 OK\n%s\n\n%s"%(headers_text, html)))
+
+	headers = {}
+	headers['Content-type'] = 'text/html; charset=utf-8'
+	headers['Content-length'] = len(html)
+	headers_text = "\n".join([ "%s: %s"%(k,v) for k,v in headers.items()])
+
+	conn.send(("HTTP/1.1 200 OK\n%s\n\n%s"%(headers_text, html)).encode('ascii'))
 	conn.close()
 
 def check_existance(path):
@@ -102,7 +115,7 @@ def http(conn):
 			break
 
 	req = clearReq(req_str.split('\r\n'))
-	#print(req[0])
+	print(req[0])
 	a = re.match('^(\w+)\s(.*)\s(HTTP.*?)', req.pop(0))
 	path = a.group(2)
 	method = a.group(1)
@@ -136,5 +149,5 @@ if __name__ == '__main__':
 	while True:
 		conn, addr = sock.accept()
 		print(str(addr) + " - connected")
-		http(conn)
+		Thread(target = http, args = [conn]).start()
 
